@@ -414,3 +414,14 @@ els.dialogBackdrop.addEventListener('click', (e) => {
 window.addEventListener('keydown', (e) => {
   if (!els.dialogBackdrop.hidden && e.key === 'Escape') closeDialog();
 });
+
+function flashSlotPill(index) {
+  // Find the pill in the strip by its child index after a render.
+  const pill = els.slotStrip.children[index];
+  if (!pill) return;
+  pill.classList.remove('flash');
+  // Force a reflow so the animation re-runs even if class was just removed.
+  // eslint-disable-next-line no-unused-expressions
+  pill.offsetWidth;
+  pill.classList.add('flash');
+}
