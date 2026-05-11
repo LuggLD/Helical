@@ -81,7 +81,25 @@ function slotGradient(s) {
 
 // --- Renderers (filled in by later tasks) ------------------------------
 
-function renderSlotStrip() { /* Task 16 */ }
+function renderSlotStrip() {
+  els.slotStrip.innerHTML = '';
+  for (let i = 0; i < state.slots.length; i++) {
+    const s = state.slots[i];
+    const pill = document.createElement('button');
+    pill.type = 'button';
+    pill.className = 'slot-pill' + (i === state.currentSlotIndex ? ' active' : '');
+    pill.style.background = slotGradient(s);
+    pill.style.backgroundOrigin = 'border-box';
+    pill.style.backgroundRepeat = 'no-repeat';
+    pill.textContent = String(i).padStart(2, '0');
+    pill.title = `Slot ${i} · ${s.notes.size} note${s.notes.size === 1 ? '' : 's'}`;
+    pill.addEventListener('click', () => {
+      state.currentSlotIndex = i;
+      renderAll();
+    });
+    els.slotStrip.appendChild(pill);
+  }
+}
 function renderPiano()     { /* Task 17 */ }
 function renderLedEditor() { /* Task 19 */ }
 function renderValidation(){ /* Task 21 */ }
