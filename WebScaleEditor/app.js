@@ -87,7 +87,7 @@ function commit(reason) {
   state.redoStack.length = 0;
 }
 
-// --- Renderers (filled in by later tasks) ------------------------------
+// --- Renderers ----------------------------------------------------------
 
 function renderSlotStrip() {
   els.slotStrip.innerHTML = '';
@@ -155,7 +155,6 @@ function renderPiano() {
   }
 }
 
-// Stub — implemented in Task 18.
 function togglePianoNote(n) {
   const slot = state.slots[state.currentSlotIndex];
   commit(`toggle note ${n} in slot ${state.currentSlotIndex}`);
@@ -233,7 +232,6 @@ function renderAll() {
 }
 
 renderAll();
-console.log('[WebScaleEditor] booted, 16 default slots');
 
 // Use 'change' (fires once on picker dismiss), NOT 'input' (fires while
 // dragging — would flood the undo stack).
