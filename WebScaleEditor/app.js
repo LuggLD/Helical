@@ -232,3 +232,14 @@ els.rootEmph.addEventListener('change', (e) => {
   state.slots[state.currentSlotIndex] = { ...slot, rootEmphasize: e.target.checked };
   renderAll();
 });
+
+els.btnClear.addEventListener('click', () => {
+  const slot = state.slots[state.currentSlotIndex];
+  if (slot.notes.size > 0) {
+    const ok = confirm(`Clear all ${slot.notes.size} note${slot.notes.size === 1 ? '' : 's'} from slot ${state.currentSlotIndex}? (LED colors and Root Emphasize will be preserved.)`);
+    if (!ok) return;
+  }
+  commit(`clear notes in slot ${state.currentSlotIndex}`);
+  state.slots = clearSlot(state.slots, state.currentSlotIndex);
+  renderAll();
+});
