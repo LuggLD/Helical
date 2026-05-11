@@ -119,3 +119,12 @@ export function slotsEqual(a, b) {
   }
   return true;
 }
+
+export function createDefaultSlots() {
+  return Array.from({ length: 16 }, () => ({
+    led1: { r: 0, g: 0, b: 0 },
+    led2: { r: 0, g: 0, b: 0 },
+    rootEmphasize: false,
+    notes: new Set(),
+  }));
+}

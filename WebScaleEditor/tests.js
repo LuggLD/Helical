@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { VERSION, parseScaleFile, serializeScaleFile, validateSlot, deepCloneSlots, slotsEqual } from './core.js';
+import { VERSION, parseScaleFile, serializeScaleFile, validateSlot, deepCloneSlots, slotsEqual, createDefaultSlots } from './core.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -200,4 +200,26 @@ test('slotsEqual returns false when rootEmphasize differs', () => {
   const b = deepCloneSlots(a);
   b[7].rootEmphasize = !b[7].rootEmphasize;
   assert.equal(slotsEqual(a, b), false);
+});
+
+test('createDefaultSlots returns 16 slots', () => {
+  assert.equal(createDefaultSlots().length, 16);
+});
+
+test('createDefaultSlots has all LEDs off, no notes, no emphasis', () => {
+  const slots = createDefaultSlots();
+  for (const s of slots) {
+    assert.deepEqual(s.led1, { r: 0, g: 0, b: 0 });
+    assert.deepEqual(s.led2, { r: 0, g: 0, b: 0 });
+    assert.equal(s.rootEmphasize, false);
+    assert.equal(s.notes.size, 0);
+  }
+});
+
+test('createDefaultSlots returns independent objects', () => {
+  const slots = createDefaultSlots();
+  slots[0].led1.r = 200;
+  slots[0].notes.add(5);
+  assert.equal(slots[1].led1.r, 0);
+  assert.equal(slots[1].notes.size, 0);
 });
