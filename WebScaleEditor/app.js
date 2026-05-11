@@ -465,3 +465,28 @@ els.btnCopy.addEventListener('click', () => {
     },
   });
 });
+
+els.btnPreset.addEventListener('click', () => {
+  const targetIdx = state.currentSlotIndex;
+  openDialog({
+    title: `Apply preset to slot ${targetIdx}…`,
+    lead: 'Pick a factory preset, then choose what to apply.',
+    cbNotesLabel: 'Apply notes (includes the Root Emphasize flag)',
+    cbColorsLabel: 'Apply LED colors',
+    pickerEntries: FACTORY_PRESETS.map(p => ({
+      label: p.name,
+      slot: p.slot,
+      disabled: false,
+    })),
+    onSelectionChange(_presetIdx, flags) {
+      return describeReplacement(state.slots[targetIdx], flags);
+    },
+    onConfirm(presetIdx, flags) {
+      commit(`apply preset "${FACTORY_PRESETS[presetIdx].name}" to slot ${targetIdx}`);
+      state.slots = applyToSlot(state.slots, FACTORY_PRESETS[presetIdx].slot, targetIdx, flags);
+      renderAll();
+      flashSlotPill(targetIdx);
+      return true;
+    },
+  });
+});
