@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { VERSION, parseScaleFile, serializeScaleFile, validateSlot } from './core.js';
+import { VERSION, parseScaleFile, serializeScaleFile, validateSlot, deepCloneSlots, slotsEqual } from './core.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -163,4 +163,41 @@ test('validateSlot warns about notes >= 48', () => {
   };
   const w = validateSlot(slot);
   assert.ok(w.some(s => /48/.test(s) && /60/.test(s)));
+});
+
+test('deepCloneSlots produces an independent copy including the notes Set', () => {
+  const orig = parseScaleFile(FACTORY).slots;
+  const copy = deepCloneSlots(orig);
+  assert.notEqual(copy, orig);
+  assert.notEqual(copy[0], orig[0]);
+  assert.notEqual(copy[0].notes, orig[0].notes);
+  copy[0].notes.add(99);
+  assert.equal(orig[0].notes.has(99), false);
+});
+
+test('slotsEqual returns true for identical clones', () => {
+  const a = parseScaleFile(FACTORY).slots;
+  const b = deepCloneSlots(a);
+  assert.equal(slotsEqual(a, b), true);
+});
+
+test('slotsEqual returns false when a note differs', () => {
+  const a = parseScaleFile(FACTORY).slots;
+  const b = deepCloneSlots(a);
+  b[3].notes.add(99);
+  assert.equal(slotsEqual(a, b), false);
+});
+
+test('slotsEqual returns false when an LED color differs', () => {
+  const a = parseScaleFile(FACTORY).slots;
+  const b = deepCloneSlots(a);
+  b[5].led1.r = (b[5].led1.r + 1) % 256;
+  assert.equal(slotsEqual(a, b), false);
+});
+
+test('slotsEqual returns false when rootEmphasize differs', () => {
+  const a = parseScaleFile(FACTORY).slots;
+  const b = deepCloneSlots(a);
+  b[7].rootEmphasize = !b[7].rootEmphasize;
+  assert.equal(slotsEqual(a, b), false);
 });

@@ -92,3 +92,30 @@ export function validateSlot(slot) {
   }
   return out;
 }
+
+export function deepCloneSlots(slots) {
+  return slots.map(s => ({
+    led1: { ...s.led1 },
+    led2: { ...s.led2 },
+    rootEmphasize: s.rootEmphasize,
+    notes: new Set(s.notes),
+  }));
+}
+
+function setsEqual(a, b) {
+  if (a.size !== b.size) return false;
+  for (const x of a) if (!b.has(x)) return false;
+  return true;
+}
+
+export function slotsEqual(a, b) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const x = a[i], y = b[i];
+    if (x.led1.r !== y.led1.r || x.led1.g !== y.led1.g || x.led1.b !== y.led1.b) return false;
+    if (x.led2.r !== y.led2.r || x.led2.g !== y.led2.g || x.led2.b !== y.led2.b) return false;
+    if (x.rootEmphasize !== y.rootEmphasize) return false;
+    if (!setsEqual(x.notes, y.notes)) return false;
+  }
+  return true;
+}
