@@ -121,9 +121,30 @@ const BLACK_HALF_PCT = BLACK_WIDTH_PCT / 2;
 
 function isRootSemitone(n) { return n % 12 === 0; }
 
+// Per the Japanese README, when notes are defined in some octave, the device
+// applies that octave's pattern for octaves above it (Spread can reach G9).
+// Compute the extrapolated semitones so the piano can render them as ghosts.
+function computeGhostSemitones(slot) {
+  const ghosts = new Set();
+  if (slot.notes.size === 0) return ghosts;
+  const notes = [...slot.notes];
+  const topOctave = Math.floor(Math.max(...notes) / 12);
+  const topPattern = new Set(
+    notes.filter(n => Math.floor(n / 12) === topOctave).map(n => n % 12)
+  );
+  for (let o = topOctave + 1; o < 4; o++) {
+    for (const offset of topPattern) {
+      const semitone = 12 * o + offset;
+      if (!slot.notes.has(semitone)) ghosts.add(semitone);
+    }
+  }
+  return ghosts;
+}
+
 function renderPiano() {
   els.piano.innerHTML = '';
   const slot = state.slots[state.currentSlotIndex];
+  const ghosts = computeGhostSemitones(slot);
 
   // White keys, 28 of them.
   for (let oct = 0; oct < 4; oct++) {
@@ -132,6 +153,7 @@ function renderPiano() {
       const k = document.createElement('div');
       k.className = 'pk-white'
         + (slot.notes.has(n) ? ' on' : '')
+        + (ghosts.has(n) ? ' ghost-on' : '')
         + (isRootSemitone(n) ? ' root' : '');
       k.dataset.note = String(n);
       k.addEventListener('click', () => togglePianoNote(n));
@@ -147,7 +169,9 @@ function renderPiano() {
       const semitone = 12 * oct + semWithinOct;
       const leftPct = (boundaryN * 100 / 28) - BLACK_HALF_PCT;
       const k = document.createElement('div');
-      k.className = 'pk-black' + (slot.notes.has(semitone) ? ' on' : '');
+      k.className = 'pk-black'
+        + (slot.notes.has(semitone) ? ' on' : '')
+        + (ghosts.has(semitone) ? ' ghost-on' : '');
       k.style.left = leftPct.toFixed(3) + '%';
       k.dataset.note = String(semitone);
       k.addEventListener('click', () => togglePianoNote(semitone));

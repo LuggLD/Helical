@@ -140,6 +140,11 @@ body {
 .pk-white.root { background: #ffd5b3; color: #663300; font-weight: 600; }
 .pk-white.on   { background: #ffb84d; }
 .pk-white.root.on { background: #ff6a3d; color: #fff; }
+/* Extrapolated upper-octave notes that the device WILL also play (per the
+   Japanese README, the highest defined octave's pattern repeats upward).
+   Defined after .root so an extrapolated root in an upper octave shows
+   the ghost tint instead of the structural-root peach. */
+.pk-white.ghost-on { background: #f6d590; }
 
 .pk-black {
   position: absolute; top: 0; width: 2.3%; height: 62%;
@@ -154,6 +159,7 @@ body {
 /* IMPORTANT: black-key "on" tint differs from white-key tint so the
    highlighted blacks remain visually distinct against highlighted whites. */
 .pk-black.on { background: #b87a1f; color: #fff; }
+.pk-black.ghost-on { background: #5a4220; }
 
 .octave-ruler {
   display: grid; grid-template-columns: repeat(4, 1fr);
