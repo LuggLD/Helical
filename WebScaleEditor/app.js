@@ -338,3 +338,79 @@ window.addEventListener('beforeunload', (e) => {
     e.returnValue = '';
   }
 });
+
+let dialogState = null;   // active dialog session
+
+function openDialog(opts) {
+  dialogState = {
+    selectedIndex: -1,
+    opts,
+  };
+  els.dialogTitle.textContent = opts.title;
+  els.dialogLead.textContent = opts.lead;
+  els.dialogCbNotesLabel.textContent = opts.cbNotesLabel;
+  els.dialogCbColorsLabel.textContent = opts.cbColorsLabel;
+  els.dialogCbNotes.checked = true;
+  els.dialogCbColors.checked = true;
+
+  // Build picker.
+  els.dialogPicker.innerHTML = '';
+  opts.pickerEntries.forEach((entry, i) => {
+    const p = document.createElement('button');
+    p.type = 'button';
+    p.className = 'dialog-pill' + (entry.disabled ? ' self' : '');
+    p.style.background = slotGradient(entry.slot);
+    p.style.backgroundOrigin = 'border-box';
+    p.style.backgroundRepeat = 'no-repeat';
+    p.textContent = entry.label || String(i).padStart(2, '0');
+    if (entry.disabled) {
+      p.disabled = true;
+    } else {
+      p.addEventListener('click', () => {
+        dialogState.selectedIndex = i;
+        for (const child of els.dialogPicker.children) {
+          child.classList.toggle('selected', child === p);
+        }
+        refreshDialog();
+      });
+    }
+    els.dialogPicker.appendChild(p);
+  });
+
+  refreshDialog();
+  els.dialogBackdrop.hidden = false;
+}
+
+function refreshDialog() {
+  const { selectedIndex, opts } = dialogState;
+  const flags = { notes: els.dialogCbNotes.checked, colors: els.dialogCbColors.checked };
+  const warning = (selectedIndex >= 0)
+    ? (opts.onSelectionChange ? opts.onSelectionChange(selectedIndex, flags) : '')
+    : '';
+  els.dialogWarning.hidden = !warning;
+  els.dialogWarning.textContent = warning;
+  els.dialogConfirm.disabled = !(selectedIndex >= 0 && (flags.notes || flags.colors));
+}
+
+function closeDialog() {
+  els.dialogBackdrop.hidden = true;
+  dialogState = null;
+}
+
+els.dialogCbNotes.addEventListener('change', () => dialogState && refreshDialog());
+els.dialogCbColors.addEventListener('change', () => dialogState && refreshDialog());
+els.dialogCancel.addEventListener('click', closeDialog);
+els.dialogConfirm.addEventListener('click', () => {
+  if (!dialogState || dialogState.selectedIndex < 0) return;
+  const { selectedIndex, opts } = dialogState;
+  const flags = { notes: els.dialogCbNotes.checked, colors: els.dialogCbColors.checked };
+  if (opts.onConfirm(selectedIndex, flags) !== false) closeDialog();
+});
+
+// Close on backdrop click or Escape.
+els.dialogBackdrop.addEventListener('click', (e) => {
+  if (e.target === els.dialogBackdrop) closeDialog();
+});
+window.addEventListener('keydown', (e) => {
+  if (!els.dialogBackdrop.hidden && e.key === 'Escape') closeDialog();
+});
