@@ -490,3 +490,35 @@ els.btnPreset.addEventListener('click', () => {
     },
   });
 });
+
+window.addEventListener('keydown', (e) => {
+  // Skip when typing in a form field.
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'select' || tag === 'textarea') {
+    // Allow Ctrl/Cmd-S even in inputs.
+    if (!((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's')) return;
+  }
+  // Don't interfere when a dialog is open (it handles its own Escape).
+  if (!els.dialogBackdrop.hidden) return;
+
+  const mod = e.ctrlKey || e.metaKey;
+
+  if (mod && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+    e.preventDefault();
+    els.btnUndo.click();
+  } else if (mod && (e.key.toLowerCase() === 'z' && e.shiftKey || e.key.toLowerCase() === 'y')) {
+    e.preventDefault();
+    els.btnRedo.click();
+  } else if (mod && e.key.toLowerCase() === 's') {
+    e.preventDefault();
+    els.btnSave.click();
+  } else if (e.key === 'ArrowLeft' && !mod) {
+    e.preventDefault();
+    state.currentSlotIndex = (state.currentSlotIndex + 15) % 16;
+    renderAll();
+  } else if (e.key === 'ArrowRight' && !mod) {
+    e.preventDefault();
+    state.currentSlotIndex = (state.currentSlotIndex + 1) % 16;
+    renderAll();
+  }
+});
