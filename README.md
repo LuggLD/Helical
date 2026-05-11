@@ -164,7 +164,11 @@ Use [Wave Edit](https://synthtech.com/waveedit/) to create custom wavetable pres
 ---
 
 # Scale Editing
-Use the [Scale Editor](https://github.com/SdkcInstruments/Helical/tree/main/ScaleEditor) on GitHub.
+
+Two editors are available:
+
+- **[Web Scale Editor](https://github.com/SdkcInstruments/Helical/tree/main/WebScaleEditor)** — runs in any modern browser, no install required. Open `index.html` directly or use a hosted copy.
+- **[Scale Editor (Max)](https://github.com/SdkcInstruments/Helical/tree/main/ScaleEditor)** — the original Max-based editor. Requires Max 9 or the macOS `.app` build.
 
 ---
 
