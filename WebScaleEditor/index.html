@@ -1,12 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Helical Scale Editor</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Helical Scale Editor</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main id="root">scaffold</main>
-<script type="module" src="app.js"></script>
+  <header class="app-header">
+    <h1>Helical Scale Editor</h1>
+    <div class="dirty-indicator" id="dirty-indicator" hidden>● unsaved changes</div>
+  </header>
+
+  <div class="error-banner" id="error-banner" hidden></div>
+
+  <nav class="toolbar" id="toolbar">
+    <button type="button" id="btn-load">📂 Load</button>
+    <button type="button" id="btn-save">💾 Save</button>
+    <button type="button" id="btn-undo" disabled>↶ Undo</button>
+    <button type="button" id="btn-redo" disabled>↷ Redo</button>
+    <span class="toolbar-sep"></span>
+    <button type="button" id="btn-copy">⎘ Copy to…</button>
+    <button type="button" id="btn-preset">📚 Apply preset…</button>
+    <input type="file" id="file-input" accept=".txt,text/plain" hidden>
+  </nav>
+
+  <div class="slot-strip" id="slot-strip" role="tablist" aria-label="Scale slots"></div>
+
+  <section class="editor" id="editor">
+    <h2 class="editor-title" id="editor-title">Slot 00</h2>
+
+    <div class="piano" id="piano" aria-label="Note editor"></div>
+    <div class="octave-ruler" aria-hidden="true">
+      <div>Octave 0</div><div>Octave 1</div><div>Octave 2</div><div>Octave 3</div>
+    </div>
+
+    <div class="led-editor">
+      <label class="led-control">
+        LED 1
+        <input type="color" id="led1-input" value="#000000">
+      </label>
+      <label class="led-control">
+        LED 2
+        <input type="color" id="led2-input" value="#000000">
+      </label>
+      <div class="led-preview" id="led-preview" aria-label="Hardware blend preview"></div>
+      <label class="emphasize-toggle">
+        <input type="checkbox" id="root-emphasize-input">
+        Root Emphasize
+      </label>
+      <button type="button" id="btn-clear" class="btn-clear">Clear notes</button>
+    </div>
+
+    <div class="validation-strip" id="validation-strip"></div>
+  </section>
+
+  <div class="dialog-backdrop" id="dialog-backdrop" hidden>
+    <div class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+      <h3 class="dialog-title" id="dialog-title"></h3>
+      <p class="dialog-lead" id="dialog-lead"></p>
+      <div class="dialog-picker" id="dialog-picker"></div>
+      <div class="dialog-options">
+        <label><input type="checkbox" id="dialog-cb-notes" checked> <span id="dialog-cb-notes-label">Copy notes</span></label>
+        <label><input type="checkbox" id="dialog-cb-colors" checked> <span id="dialog-cb-colors-label">Copy LED colors</span></label>
+      </div>
+      <div class="dialog-warning" id="dialog-warning" hidden></div>
+      <div class="dialog-actions">
+        <button type="button" id="dialog-cancel">Cancel</button>
+        <button type="button" id="dialog-confirm" disabled>Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>
