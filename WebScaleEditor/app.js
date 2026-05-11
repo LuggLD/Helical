@@ -170,7 +170,13 @@ function togglePianoNote(n) {
   state.slots[state.currentSlotIndex] = newSlot;
   renderAll();
 }
-function renderLedEditor() { /* Task 19 */ }
+function renderLedEditor() {
+  const slot = state.slots[state.currentSlotIndex];
+  els.led1.value = rgbToHex(slot.led1);
+  els.led2.value = rgbToHex(slot.led2);
+  els.rootEmph.checked = slot.rootEmphasize;
+  els.ledPreview.style.background = slotGradient(slot);
+}
 function renderValidation(){ /* Task 21 */ }
 function renderToolbar()   { /* Task 24+27 */ }
 function renderDirty() {
@@ -188,3 +194,24 @@ function renderAll() {
 
 renderAll();
 console.log('[WebScaleEditor] booted, 16 default slots');
+
+// Use 'change' (fires once on picker dismiss), NOT 'input' (fires while
+// dragging — would flood the undo stack).
+els.led1.addEventListener('change', (e) => {
+  commit('change LED 1 color');
+  const slot = state.slots[state.currentSlotIndex];
+  state.slots[state.currentSlotIndex] = { ...slot, led1: hexToRgb(e.target.value) };
+  renderAll();
+});
+els.led2.addEventListener('change', (e) => {
+  commit('change LED 2 color');
+  const slot = state.slots[state.currentSlotIndex];
+  state.slots[state.currentSlotIndex] = { ...slot, led2: hexToRgb(e.target.value) };
+  renderAll();
+});
+els.rootEmph.addEventListener('change', (e) => {
+  commit('toggle root emphasize');
+  const slot = state.slots[state.currentSlotIndex];
+  state.slots[state.currentSlotIndex] = { ...slot, rootEmphasize: e.target.checked };
+  renderAll();
+});
