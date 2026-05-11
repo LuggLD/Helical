@@ -195,7 +195,30 @@ function renderValidation() {
     }
   }
 }
-function renderToolbar()   { /* Task 24+27 */ }
+function renderToolbar() {
+  els.btnUndo.disabled = state.undoStack.length === 0;
+  els.btnRedo.disabled = state.redoStack.length === 0;
+
+  const undoTop = state.undoStack[state.undoStack.length - 1];
+  els.btnUndo.title = undoTop
+    ? (state.savedSnapshot && slotsEqual(undoTop.snapshot, state.savedSnapshot)
+        ? 'Undo to last saved state'
+        : `Undo: ${undoTop.reason}`)
+    : 'Nothing to undo';
+
+  const redoTop = state.redoStack[state.redoStack.length - 1];
+  els.btnRedo.title = redoTop
+    ? (state.savedSnapshot && slotsEqual(redoTop.snapshot, state.savedSnapshot)
+        ? 'Redo to last saved state'
+        : `Redo: ${redoTop.reason}`)
+    : 'Nothing to redo';
+
+  // "Return to saved" indicator
+  const undoLeadsToSaved = undoTop && state.savedSnapshot && slotsEqual(undoTop.snapshot, state.savedSnapshot);
+  const redoLeadsToSaved = redoTop && state.savedSnapshot && slotsEqual(redoTop.snapshot, state.savedSnapshot);
+  els.btnUndo.classList.toggle('saved-hint', !!undoLeadsToSaved);
+  els.btnRedo.classList.toggle('saved-hint', !!redoLeadsToSaved);
+}
 function renderDirty() {
   els.dirty.hidden = !isDirty();
 }
@@ -291,5 +314,20 @@ els.fileInput.addEventListener('change', async (e) => {
   state.undoStack.length = 0;
   state.redoStack.length = 0;
   state.currentSlotIndex = 0;
+  renderAll();
+});
+
+els.btnUndo.addEventListener('click', () => {
+  if (state.undoStack.length === 0) return;
+  const entry = state.undoStack.pop();
+  state.redoStack.push({ snapshot: deepCloneSlots(state.slots), reason: entry.reason });
+  state.slots = entry.snapshot;
+  renderAll();
+});
+els.btnRedo.addEventListener('click', () => {
+  if (state.redoStack.length === 0) return;
+  const entry = state.redoStack.pop();
+  state.undoStack.push({ snapshot: deepCloneSlots(state.slots), reason: entry.reason });
+  state.slots = entry.snapshot;
   renderAll();
 });
