@@ -177,7 +177,24 @@ function renderLedEditor() {
   els.rootEmph.checked = slot.rootEmphasize;
   els.ledPreview.style.background = slotGradient(slot);
 }
-function renderValidation(){ /* Task 21 */ }
+function renderValidation() {
+  const slot = state.slots[state.currentSlotIndex];
+  const warns = validateSlot(slot);
+  els.validation.innerHTML = '';
+  if (warns.length === 0) {
+    const ok = document.createElement('span');
+    ok.className = 'ok';
+    ok.textContent = '✓ OK';
+    els.validation.appendChild(ok);
+  } else {
+    for (const w of warns) {
+      const div = document.createElement('div');
+      div.className = 'warn';
+      div.textContent = '⚠ ' + w;
+      els.validation.appendChild(div);
+    }
+  }
+}
 function renderToolbar()   { /* Task 24+27 */ }
 function renderDirty() {
   els.dirty.hidden = !isDirty();
