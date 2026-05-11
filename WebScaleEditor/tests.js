@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { VERSION, parseScaleFile, serializeScaleFile, validateSlot, deepCloneSlots, slotsEqual, createDefaultSlots, applyToSlot, clearSlot } from './core.js';
+import { VERSION, parseScaleFile, serializeScaleFile, validateSlot, deepCloneSlots, slotsEqual, createDefaultSlots, applyToSlot, clearSlot, FACTORY_PRESETS } from './core.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -307,4 +307,47 @@ test('clearSlot leaves non-target slots referentially equal', () => {
   const slots = parseScaleFile(FACTORY).slots;
   const out = clearSlot(slots, 3);
   assert.equal(out[0], slots[0]);
+});
+
+test('FACTORY_PRESETS has 16 entries', () => {
+  assert.equal(FACTORY_PRESETS.length, 16);
+});
+
+test('FACTORY_PRESETS names match the actual factory file order', () => {
+  const expected = [
+    'Major(R)', 'Lydian(R)', 'Mixolydian(R)', 'Major Pentatonic(R)',
+    'Natural Minor(R)', 'Dorian(R)', 'Phrygian(R)', 'Minor Pentatonic(R)',
+    'Whole tone', 'Chromatic',
+    'I M7(R)', 'II m7(R)', 'III m7(R)', 'IV M7(R)',
+    'V 7(R)', 'VI m7(R)',
+  ];
+  assert.deepEqual(FACTORY_PRESETS.map(p => p.name), expected);
+});
+
+test('FACTORY_PRESETS[0] (Major(R)) has expected content', () => {
+  const p = FACTORY_PRESETS[0].slot;
+  assert.deepEqual(p.led1, { r: 127, g: 0, b: 0 });
+  assert.deepEqual(p.led2, { r: 127, g: 0, b: 51 });
+  assert.equal(p.rootEmphasize, true);
+  assert.deepEqual([...p.notes].sort((a,b)=>a-b), [0,7,12,14,16,17,19,21,23]);
+});
+
+test('FACTORY_PRESETS[9] (Chromatic) has 12 notes from 0 to 11', () => {
+  const p = FACTORY_PRESETS[9].slot;
+  assert.equal(p.rootEmphasize, false);
+  assert.deepEqual([...p.notes].sort((a,b)=>a-b), [0,1,2,3,4,5,6,7,8,9,10,11]);
+});
+
+test('FACTORY_PRESETS slots match parseScaleFile of factory file', () => {
+  const parsed = parseScaleFile(FACTORY).slots;
+  for (let i = 0; i < 16; i++) {
+    assert.deepEqual(FACTORY_PRESETS[i].slot.led1, parsed[i].led1, `slot ${i} led1`);
+    assert.deepEqual(FACTORY_PRESETS[i].slot.led2, parsed[i].led2, `slot ${i} led2`);
+    assert.equal(FACTORY_PRESETS[i].slot.rootEmphasize, parsed[i].rootEmphasize, `slot ${i} re`);
+    assert.deepEqual(
+      [...FACTORY_PRESETS[i].slot.notes].sort((a,b)=>a-b),
+      [...parsed[i].notes].sort((a,b)=>a-b),
+      `slot ${i} notes`
+    );
+  }
 });

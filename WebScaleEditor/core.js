@@ -160,3 +160,39 @@ export function clearSlot(slots, targetIndex) {
   out[targetIndex] = next;
   return out;
 }
+
+const FACTORY_FILE_TEXT = `\
+127 0 0 127 0 51 1 0 7 12 14 16 17 19 21 23
+0 102 0 127 0 51 1 0 7 12 14 16 18 19 21 23
+0 0 127 127 0 51 1 0 7 12 14 16 17 19 21 22
+127 127 51 127 0 51 1 0 7 12 14 16 19 21
+0 0 127 51 102 127 1 0 7 12 14 15 17 19 20 22
+102 0 0 51 102 127 1 0 7 12 14 15 17 19 21 22
+0 152 0 51 102 127 1 0 7 12 13 15 17 19 20 22
+127 127 51 51 102 127 1 0 7 12 15 17 19 22
+0 127 51 127 127 0 0 0 2 4 6 8 10
+127 127 51 127 127 51 0 0 1 2 3 4 5 6 7 8 9 10 11
+127 127 51 152 0 0 1 0 7 12 16 19 23
+51 51 127 0 152 0 1 2 9 12 14 17 21
+51 51 127 0 0 127 1 4 11 14 16 19 23
+127 127 51 127 127 0 1 5 12 16 17 21
+127 127 0 0 127 102 1 7 14 17 19 23
+51 51 127 127 0 102 1 9 12 16 19 21`;
+
+const FACTORY_PRESET_NAMES = [
+  'Major(R)', 'Lydian(R)', 'Mixolydian(R)', 'Major Pentatonic(R)',
+  'Natural Minor(R)', 'Dorian(R)', 'Phrygian(R)', 'Minor Pentatonic(R)',
+  'Whole tone', 'Chromatic',
+  'I M7(R)', 'II m7(R)', 'III m7(R)', 'IV M7(R)',
+  'V 7(R)', 'VI m7(R)',
+];
+
+const _parsedFactory = parseScaleFile(FACTORY_FILE_TEXT);
+if (_parsedFactory.errors.length > 0) {
+  throw new Error('FACTORY_FILE_TEXT failed to parse: ' + _parsedFactory.errors.join('; '));
+}
+
+export const FACTORY_PRESETS = _parsedFactory.slots.map((slot, i) => ({
+  name: FACTORY_PRESET_NAMES[i],
+  slot,
+}));
