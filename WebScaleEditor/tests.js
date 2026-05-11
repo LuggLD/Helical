@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { VERSION, parseScaleFile, serializeScaleFile } from './core.js';
+import { VERSION, parseScaleFile, serializeScaleFile, validateSlot } from './core.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -122,4 +122,45 @@ test('parse → serialize → parse round-trips on factory file', () => {
       `slot ${i} notes`
     );
   }
+});
+
+test('validateSlot returns no warnings for a normal slot', () => {
+  const slot = {
+    led1: { r: 127, g: 0, b: 0 }, led2: { r: 127, g: 0, b: 51 },
+    rootEmphasize: true, notes: new Set([0, 7, 12, 14, 16, 17, 19, 21, 23]),
+  };
+  assert.deepEqual(validateSlot(slot), []);
+});
+
+test('validateSlot warns on empty notes', () => {
+  const slot = {
+    led1: { r: 0, g: 0, b: 0 }, led2: { r: 0, g: 0, b: 0 },
+    rootEmphasize: false, notes: new Set(),
+  };
+  assert.ok(validateSlot(slot).some(w => /empty/i.test(w)));
+});
+
+test('validateSlot warns when root emphasize on + no notes >= 12', () => {
+  const slot = {
+    led1: { r: 0, g: 0, b: 0 }, led2: { r: 0, g: 0, b: 0 },
+    rootEmphasize: true, notes: new Set([0, 2, 4, 7]),
+  };
+  assert.ok(validateSlot(slot).some(w => /first octave/i.test(w) || /silence/i.test(w)));
+});
+
+test('validateSlot does NOT warn about emphasize-silence when rootEmphasize off', () => {
+  const slot = {
+    led1: { r: 0, g: 0, b: 0 }, led2: { r: 0, g: 0, b: 0 },
+    rootEmphasize: false, notes: new Set([0, 2, 4, 7]),
+  };
+  assert.equal(validateSlot(slot).length, 0);
+});
+
+test('validateSlot warns about notes >= 48', () => {
+  const slot = {
+    led1: { r: 0, g: 0, b: 0 }, led2: { r: 0, g: 0, b: 0 },
+    rootEmphasize: false, notes: new Set([0, 7, 48, 60]),
+  };
+  const w = validateSlot(slot);
+  assert.ok(w.some(s => /48/.test(s) && /60/.test(s)));
 });

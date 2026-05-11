@@ -74,3 +74,21 @@ export function serializeScaleFile(slots) {
     return parts.join(' ');
   }).join('\n') + '\n';
 }
+
+export function validateSlot(slot) {
+  const out = [];
+  if (slot.notes.size === 0) {
+    out.push('Scale is empty');
+  }
+  if (slot.rootEmphasize && slot.notes.size > 0) {
+    const hasUpper = [...slot.notes].some(n => n >= 12);
+    if (!hasUpper) {
+      out.push('Root Emphasize is on but no notes above the first octave — this will produce silence');
+    }
+  }
+  const oor = [...slot.notes].filter(n => n >= 48).sort((a, b) => a - b);
+  if (oor.length > 0) {
+    out.push(`Notes outside the editor's 4-octave range (>=48): ${oor.join(', ')}`);
+  }
+  return out;
+}
