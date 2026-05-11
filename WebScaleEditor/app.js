@@ -425,3 +425,43 @@ function flashSlotPill(index) {
   pill.offsetWidth;
   pill.classList.add('flash');
 }
+
+function describeReplacement(targetSlot, flags) {
+  const bits = [];
+  if (flags.notes && targetSlot.notes.size > 0) {
+    bits.push(`${targetSlot.notes.size} note${targetSlot.notes.size === 1 ? '' : 's'}`);
+  }
+  if (flags.colors) {
+    const hasColor = targetSlot.led1.r || targetSlot.led1.g || targetSlot.led1.b ||
+                     targetSlot.led2.r || targetSlot.led2.g || targetSlot.led2.b;
+    if (hasColor) bits.push('LED colors');
+  }
+  if (bits.length === 0) return '';
+  return `⚠ Existing ${bits.join(' and ')} will be replaced.`;
+}
+
+els.btnCopy.addEventListener('click', () => {
+  const sourceIdx = state.currentSlotIndex;
+  const sourceSlot = state.slots[sourceIdx];
+  openDialog({
+    title: `Copy slot ${sourceIdx} to…`,
+    lead: 'Pick a destination slot, then choose what to copy.',
+    cbNotesLabel: 'Copy notes (includes the Root Emphasize flag)',
+    cbColorsLabel: 'Copy LED colors',
+    pickerEntries: state.slots.map((s, i) => ({
+      label: String(i).padStart(2, '0'),
+      slot: s,
+      disabled: i === sourceIdx,
+    })),
+    onSelectionChange(targetIdx, flags) {
+      return describeReplacement(state.slots[targetIdx], flags);
+    },
+    onConfirm(targetIdx, flags) {
+      commit(`copy slot ${sourceIdx} to slot ${targetIdx}`);
+      state.slots = applyToSlot(state.slots, sourceSlot, targetIdx, flags);
+      renderAll();
+      flashSlotPill(targetIdx);
+      return true;
+    },
+  });
+});
