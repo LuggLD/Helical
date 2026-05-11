@@ -128,3 +128,19 @@ export function createDefaultSlots() {
     notes: new Set(),
   }));
 }
+
+export function applyToSlot(slots, sourceSlot, targetIndex, { notes, colors }) {
+  if (!Number.isInteger(targetIndex) || targetIndex < 0 || targetIndex >= slots.length) {
+    throw new Error(`applyToSlot: targetIndex ${targetIndex} out of range`);
+  }
+  const current = slots[targetIndex];
+  const next = {
+    led1: colors ? { ...sourceSlot.led1 } : { ...current.led1 },
+    led2: colors ? { ...sourceSlot.led2 } : { ...current.led2 },
+    rootEmphasize: notes ? sourceSlot.rootEmphasize : current.rootEmphasize,
+    notes: notes ? new Set(sourceSlot.notes) : new Set(current.notes),
+  };
+  const out = slots.slice();
+  out[targetIndex] = next;
+  return out;
+}

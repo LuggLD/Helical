@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { VERSION, parseScaleFile, serializeScaleFile, validateSlot, deepCloneSlots, slotsEqual, createDefaultSlots } from './core.js';
+import { VERSION, parseScaleFile, serializeScaleFile, validateSlot, deepCloneSlots, slotsEqual, createDefaultSlots, applyToSlot } from './core.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -222,4 +222,66 @@ test('createDefaultSlots returns independent objects', () => {
   slots[0].notes.add(5);
   assert.equal(slots[1].led1.r, 0);
   assert.equal(slots[1].notes.size, 0);
+});
+
+const SAMPLE_SOURCE = {
+  led1: { r: 50, g: 100, b: 150 },
+  led2: { r: 200, g: 0, b: 100 },
+  rootEmphasize: true,
+  notes: new Set([0, 5, 10]),
+};
+
+test('applyToSlot with both flags replaces everything in target', () => {
+  const slots = createDefaultSlots();
+  const out = applyToSlot(slots, SAMPLE_SOURCE, 3, { notes: true, colors: true });
+  assert.deepEqual(out[3].led1, SAMPLE_SOURCE.led1);
+  assert.deepEqual(out[3].led2, SAMPLE_SOURCE.led2);
+  assert.equal(out[3].rootEmphasize, true);
+  assert.deepEqual([...out[3].notes].sort(), [0, 10, 5]);
+});
+
+test('applyToSlot with notes:true colors:false leaves target LEDs untouched', () => {
+  const slots = createDefaultSlots();
+  slots[3].led1 = { r: 1, g: 2, b: 3 };
+  const out = applyToSlot(slots, SAMPLE_SOURCE, 3, { notes: true, colors: false });
+  assert.deepEqual(out[3].led1, { r: 1, g: 2, b: 3 });
+  assert.equal(out[3].rootEmphasize, true);
+  assert.equal(out[3].notes.size, 3);
+});
+
+test('applyToSlot with notes:false colors:true leaves target notes untouched', () => {
+  const slots = createDefaultSlots();
+  slots[3].notes = new Set([99]);
+  slots[3].rootEmphasize = false;
+  const out = applyToSlot(slots, SAMPLE_SOURCE, 3, { notes: false, colors: true });
+  assert.deepEqual([...out[3].notes], [99]);
+  assert.equal(out[3].rootEmphasize, false);
+  assert.deepEqual(out[3].led1, SAMPLE_SOURCE.led1);
+});
+
+test('applyToSlot returns a new array; original is unchanged', () => {
+  const slots = createDefaultSlots();
+  const out = applyToSlot(slots, SAMPLE_SOURCE, 3, { notes: true, colors: true });
+  assert.notEqual(out, slots);
+  assert.equal(slots[3].notes.size, 0);
+});
+
+test('applyToSlot returns the same slot reference for non-targets', () => {
+  const slots = createDefaultSlots();
+  const out = applyToSlot(slots, SAMPLE_SOURCE, 3, { notes: true, colors: true });
+  assert.equal(out[0], slots[0]);
+  assert.equal(out[5], slots[5]);
+});
+
+test('applyToSlot throws if target index is out of range', () => {
+  const slots = createDefaultSlots();
+  assert.throws(() => applyToSlot(slots, SAMPLE_SOURCE, -1, { notes: true, colors: true }));
+  assert.throws(() => applyToSlot(slots, SAMPLE_SOURCE, 16, { notes: true, colors: true }));
+});
+
+test('applyToSlot with neither flag is a no-op (returns slots unchanged structurally)', () => {
+  const slots = createDefaultSlots();
+  const out = applyToSlot(slots, SAMPLE_SOURCE, 3, { notes: false, colors: false });
+  assert.deepEqual([...out[3].notes], []);
+  assert.deepEqual(out[3].led1, { r: 0, g: 0, b: 0 });
 });
