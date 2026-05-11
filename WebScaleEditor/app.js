@@ -12,8 +12,11 @@ import {
 
 // --- State -------------------------------------------------------------
 
+// Initial state matches the factory scale.txt that ships on the SD card —
+// users see the same 16 slots they'd get from a fresh module on first visit.
+// createDefaultSlots() remains available but is unused at boot.
 const state = {
-  slots: createDefaultSlots(),
+  slots: deepCloneSlots(FACTORY_PRESETS.map(p => p.slot)),
   currentSlotIndex: 0,
   undoStack: [],          // { snapshot, reason }
   redoStack: [],
@@ -130,7 +133,6 @@ function renderPiano() {
       k.className = 'pk-white'
         + (slot.notes.has(n) ? ' on' : '')
         + (isRootSemitone(n) ? ' root' : '');
-      k.textContent = String(n);
       k.dataset.note = String(n);
       k.addEventListener('click', () => togglePianoNote(n));
       els.piano.appendChild(k);
@@ -147,7 +149,6 @@ function renderPiano() {
       const k = document.createElement('div');
       k.className = 'pk-black' + (slot.notes.has(semitone) ? ' on' : '');
       k.style.left = leftPct.toFixed(3) + '%';
-      k.textContent = String(semitone);
       k.dataset.note = String(semitone);
       k.addEventListener('click', () => togglePianoNote(semitone));
       els.piano.appendChild(k);

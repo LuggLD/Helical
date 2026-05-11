@@ -51,6 +51,7 @@ body {
 
 .toolbar {
   display: flex; gap: 6px; align-items: center;
+  flex-wrap: wrap;
   background: var(--bg-1);
   padding: 8px;
   border-radius: 8px;
@@ -64,6 +65,7 @@ body {
   border-radius: 5px;
   font-size: 13px;
   cursor: pointer;
+  white-space: nowrap;
 }
 .toolbar button:hover:not(:disabled) { background: var(--bg-3); }
 .toolbar button:disabled { color: var(--fg-2); cursor: not-allowed; }
