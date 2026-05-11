@@ -257,3 +257,39 @@ els.btnSave.addEventListener('click', () => {
   state.savedSnapshot = deepCloneSlots(state.slots);
   renderAll();
 });
+
+function showErrorBanner(messages) {
+  els.errorBanner.hidden = false;
+  els.errorBanner.textContent = messages.join('\n');
+}
+function clearErrorBanner() {
+  els.errorBanner.hidden = true;
+  els.errorBanner.textContent = '';
+}
+
+els.btnLoad.addEventListener('click', () => {
+  if (isDirty()) {
+    const ok = confirm('You have unsaved changes. Discard them and load a new file?');
+    if (!ok) return;
+  }
+  els.fileInput.value = '';
+  els.fileInput.click();
+});
+
+els.fileInput.addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  const { slots, errors } = parseScaleFile(text);
+  if (errors.length > 0 || !slots) {
+    showErrorBanner(['Could not load file:', ...errors]);
+    return;
+  }
+  clearErrorBanner();
+  state.slots = slots;
+  state.savedSnapshot = deepCloneSlots(slots);
+  state.undoStack.length = 0;
+  state.redoStack.length = 0;
+  state.currentSlotIndex = 0;
+  renderAll();
+});
