@@ -163,3 +163,146 @@ body {
   border-right: 1px dashed var(--bg-3);
 }
 .octave-ruler div:last-child { border-right: 0; }
+
+.led-editor {
+  display: flex; gap: 14px; align-items: center;
+  background: var(--bg-2);
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.led-control {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--fg-1); font-size: 13px;
+}
+.led-control input[type="color"] {
+  width: 38px; height: 26px;
+  background: transparent;
+  border: 1px solid var(--bg-3);
+  border-radius: 3px;
+  padding: 0; cursor: pointer;
+}
+.led-preview {
+  width: 64px; height: 26px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #000, #000);
+  background-origin: border-box;
+  background-repeat: no-repeat;
+  border: 1px solid var(--bg-3);
+}
+.emphasize-toggle {
+  display: flex; align-items: center; gap: 6px;
+  color: var(--fg-1); font-size: 13px; cursor: pointer;
+}
+.btn-clear {
+  margin-left: auto;
+  background: var(--bg-3);
+  color: var(--fg-0);
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.btn-clear:hover { background: #44446a; }
+
+.validation-strip {
+  font-size: 12px;
+  color: var(--fg-2);
+  padding: 6px 0;
+}
+.validation-strip .ok { color: var(--ok); }
+.validation-strip .warn {
+  color: var(--warn);
+  display: block;
+  background: var(--warn-bg);
+  border-left: 3px solid var(--warn);
+  padding: 6px 10px;
+  border-radius: 3px;
+  margin-bottom: 4px;
+}
+
+.dialog-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10;
+}
+.dialog {
+  background: var(--bg-1);
+  border: 1px solid var(--bg-3);
+  border-radius: 10px;
+  padding: 18px 20px;
+  width: 480px; max-width: 90vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+}
+.dialog-title { margin: 0 0 4px; color: var(--fg-0); }
+.dialog-lead { color: var(--fg-2); font-size: 12px; margin: 0 0 14px; }
+.dialog-picker {
+  display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px;
+  background: var(--bg-0); padding: 8px; border-radius: 6px;
+  margin-bottom: 14px;
+}
+.dialog-pill {
+  position: relative;
+  width: 100%; aspect-ratio: 3/4;
+  border-radius: 5px;
+  font-size: 11px; font-weight: 600;
+  color: #fff;
+  text-shadow: 0 0 3px rgba(0,0,0,0.85);
+  cursor: pointer;
+  border: 2px solid transparent;
+  background-origin: border-box;
+  background-repeat: no-repeat;
+  display: flex; align-items: center; justify-content: center;
+}
+.dialog-pill.selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.dialog-pill.self {
+  opacity: 0.35; cursor: not-allowed; filter: grayscale(0.4);
+}
+.dialog-options {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 12px;
+}
+.dialog-options label {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px;
+  background: var(--bg-2);
+  border-radius: 5px;
+  font-size: 13px; cursor: pointer;
+}
+.dialog-warning {
+  background: var(--warn-bg);
+  border-left: 3px solid var(--warn);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #e6c89a;
+  margin-bottom: 14px;
+}
+.dialog-actions {
+  display: flex; gap: 8px; justify-content: flex-end;
+}
+.dialog-actions button {
+  padding: 7px 14px;
+  border-radius: 5px;
+  border: 1px solid var(--bg-3);
+  background: var(--bg-2);
+  color: var(--fg-0);
+  cursor: pointer;
+  font-size: 13px;
+}
+.dialog-actions button:hover:not(:disabled) { background: var(--bg-3); }
+.dialog-actions button#dialog-confirm {
+  background: var(--accent); border-color: var(--accent);
+  color: var(--accent-fg);
+}
+.dialog-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.toolbar button.saved-hint {
+  box-shadow: inset 0 0 0 2px var(--ok);
+}
