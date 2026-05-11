@@ -58,3 +58,19 @@ export function parseScaleFile(text) {
   }
   return { slots, errors, warnings };
 }
+
+export function serializeScaleFile(slots) {
+  if (!Array.isArray(slots) || slots.length !== 16) {
+    throw new Error(`serializeScaleFile expects 16 slots, got ${slots && slots.length}`);
+  }
+  return slots.map(s => {
+    const sorted = [...s.notes].sort((a, b) => a - b);
+    const parts = [
+      s.led1.r, s.led1.g, s.led1.b,
+      s.led2.r, s.led2.g, s.led2.b,
+      s.rootEmphasize ? 1 : 0,
+      ...sorted,
+    ];
+    return parts.join(' ');
+  }).join('\n') + '\n';
+}

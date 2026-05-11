@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { VERSION, parseScaleFile } from './core.js';
+import { VERSION, parseScaleFile, serializeScaleFile } from './core.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -71,4 +71,55 @@ test('parseScaleFile soft-warns on LED value > 255 (loads it anyway)', () => {
   assert.equal(slots.length, 16);
   assert.equal(slots[0].led1.r, 300);
   assert.ok(warnings.some(w => /line 1.*LED/i.test(w)));
+});
+
+test('serializeScaleFile produces one line per slot, LF terminated', () => {
+  const slot = {
+    led1: { r: 127, g: 0, b: 0 },
+    led2: { r: 127, g: 0, b: 51 },
+    rootEmphasize: true,
+    notes: new Set([12, 7, 0, 14, 16, 17, 19, 21, 23]),
+  };
+  const slots = Array.from({ length: 16 }, () => slot);
+  const out = serializeScaleFile(slots);
+  const lines = out.split('\n');
+  assert.equal(lines.length, 17);
+  assert.equal(lines[16], '');
+  assert.equal(lines[0], '127 0 0 127 0 51 1 0 7 12 14 16 17 19 21 23');
+});
+
+test('serializeScaleFile emits notes sorted ascending', () => {
+  const slot = {
+    led1: { r: 0, g: 0, b: 0 }, led2: { r: 0, g: 0, b: 0 },
+    rootEmphasize: false, notes: new Set([23, 7, 0, 12]),
+  };
+  const out = serializeScaleFile(Array.from({ length: 16 }, () => slot));
+  assert.equal(out.split('\n')[0], '0 0 0 0 0 0 0 0 7 12 23');
+});
+
+test('serializeScaleFile handles empty notes set', () => {
+  const slot = {
+    led1: { r: 1, g: 2, b: 3 }, led2: { r: 4, g: 5, b: 6 },
+    rootEmphasize: true, notes: new Set(),
+  };
+  const out = serializeScaleFile(Array.from({ length: 16 }, () => slot));
+  assert.equal(out.split('\n')[0], '1 2 3 4 5 6 1');
+});
+
+test('parse → serialize → parse round-trips on factory file', () => {
+  const first = parseScaleFile(FACTORY);
+  const text = serializeScaleFile(first.slots);
+  const second = parseScaleFile(text);
+  assert.equal(second.errors.length, 0);
+  assert.equal(second.slots.length, 16);
+  for (let i = 0; i < 16; i++) {
+    assert.deepEqual(second.slots[i].led1, first.slots[i].led1, `slot ${i} led1`);
+    assert.deepEqual(second.slots[i].led2, first.slots[i].led2, `slot ${i} led2`);
+    assert.equal(second.slots[i].rootEmphasize, first.slots[i].rootEmphasize, `slot ${i} rootEmphasize`);
+    assert.deepEqual(
+      [...second.slots[i].notes].sort((a,b)=>a-b),
+      [...first.slots[i].notes].sort((a,b)=>a-b),
+      `slot ${i} notes`
+    );
+  }
 });
