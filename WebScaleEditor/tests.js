@@ -33,3 +33,42 @@ test('parseScaleFile correctly parses slot 8 of factory file (Whole tone — roo
   assert.equal(s8.rootEmphasize, false);
   assert.deepEqual([...s8.notes].sort((a,b) => a-b), [0,2,4,6,8,10]);
 });
+
+test('parseScaleFile rejects wrong line count', () => {
+  const { slots, errors } = parseScaleFile('1 2 3 4 5 6 1\n');
+  assert.equal(slots, null);
+  assert.match(errors[0], /Expected 16 lines, got 1/);
+});
+
+test('parseScaleFile rejects a line with too few tokens', () => {
+  const tooShort = '1 2 3\n' + ('1 2 3 4 5 6 1 0\n'.repeat(15));
+  const { slots, errors } = parseScaleFile(tooShort);
+  assert.equal(slots, null);
+  assert.ok(errors.some(e => /line 1.*too few/i.test(e)));
+});
+
+test('parseScaleFile rejects a non-numeric token', () => {
+  const bad = '1 2 3 4 5 6 abc 0 7\n' + ('1 2 3 4 5 6 1 0\n'.repeat(15));
+  const { slots, errors } = parseScaleFile(bad);
+  assert.equal(slots, null);
+  assert.ok(errors.some(e => /line 1.*abc/.test(e)));
+});
+
+test('parseScaleFile tolerates missing trailing newline', () => {
+  const noTrailing = FACTORY.replace(/[\s\n]+$/, '');
+  const { errors } = parseScaleFile(noTrailing);
+  assert.equal(errors.length, 0);
+});
+
+test('parseScaleFile tolerates trailing space on the last line (factory behavior)', () => {
+  const { errors } = parseScaleFile(FACTORY);
+  assert.equal(errors.length, 0);
+});
+
+test('parseScaleFile soft-warns on LED value > 255 (loads it anyway)', () => {
+  const oneBad = '300 0 0 0 0 0 0 7\n' + ('1 2 3 4 5 6 1 0\n'.repeat(15));
+  const { slots, warnings } = parseScaleFile(oneBad);
+  assert.equal(slots.length, 16);
+  assert.equal(slots[0].led1.r, 300);
+  assert.ok(warnings.some(w => /line 1.*LED/i.test(w)));
+});
