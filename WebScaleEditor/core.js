@@ -144,3 +144,19 @@ export function applyToSlot(slots, sourceSlot, targetIndex, { notes, colors }) {
   out[targetIndex] = next;
   return out;
 }
+
+export function clearSlot(slots, targetIndex) {
+  if (!Number.isInteger(targetIndex) || targetIndex < 0 || targetIndex >= slots.length) {
+    throw new Error(`clearSlot: targetIndex ${targetIndex} out of range`);
+  }
+  const current = slots[targetIndex];
+  const next = {
+    led1: { ...current.led1 },
+    led2: { ...current.led2 },
+    rootEmphasize: current.rootEmphasize,
+    notes: new Set(),
+  };
+  const out = slots.slice();
+  out[targetIndex] = next;
+  return out;
+}

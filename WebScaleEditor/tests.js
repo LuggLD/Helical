@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { VERSION, parseScaleFile, serializeScaleFile, validateSlot, deepCloneSlots, slotsEqual, createDefaultSlots, applyToSlot } from './core.js';
+import { VERSION, parseScaleFile, serializeScaleFile, validateSlot, deepCloneSlots, slotsEqual, createDefaultSlots, applyToSlot, clearSlot } from './core.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -284,4 +284,27 @@ test('applyToSlot with neither flag is a no-op (returns slots unchanged structur
   const out = applyToSlot(slots, SAMPLE_SOURCE, 3, { notes: false, colors: false });
   assert.deepEqual([...out[3].notes], []);
   assert.deepEqual(out[3].led1, { r: 0, g: 0, b: 0 });
+});
+
+test('clearSlot empties only the notes Set', () => {
+  const slots = parseScaleFile(FACTORY).slots;
+  const before = slots[3];
+  const out = clearSlot(slots, 3);
+  assert.equal(out[3].notes.size, 0);
+  assert.deepEqual(out[3].led1, before.led1);
+  assert.deepEqual(out[3].led2, before.led2);
+  assert.equal(out[3].rootEmphasize, before.rootEmphasize);
+});
+
+test('clearSlot does not mutate the original slots array', () => {
+  const slots = parseScaleFile(FACTORY).slots;
+  const sizeBefore = slots[3].notes.size;
+  clearSlot(slots, 3);
+  assert.equal(slots[3].notes.size, sizeBefore);
+});
+
+test('clearSlot leaves non-target slots referentially equal', () => {
+  const slots = parseScaleFile(FACTORY).slots;
+  const out = clearSlot(slots, 3);
+  assert.equal(out[0], slots[0]);
 });
