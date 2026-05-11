@@ -331,3 +331,10 @@ els.btnRedo.addEventListener('click', () => {
   state.slots = entry.snapshot;
   renderAll();
 });
+
+window.addEventListener('beforeunload', (e) => {
+  if (isDirty()) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
