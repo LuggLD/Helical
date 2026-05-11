@@ -100,7 +100,55 @@ function renderSlotStrip() {
     els.slotStrip.appendChild(pill);
   }
 }
-function renderPiano()     { /* Task 17 */ }
+const WHITE_SEMITONES_PER_OCTAVE = [0, 2, 4, 5, 7, 9, 11];
+const BLACK_KEY_OFFSETS = [
+  // [white boundary within octave (1..6), semitone offset within octave]
+  [1, 1], [2, 3], [4, 6], [5, 8], [6, 10],
+];
+const BLACK_WIDTH_PCT = 2.3;
+const BLACK_HALF_PCT = BLACK_WIDTH_PCT / 2;
+
+function isRootSemitone(n) { return n % 12 === 0; }
+
+function renderPiano() {
+  els.piano.innerHTML = '';
+  const slot = state.slots[state.currentSlotIndex];
+
+  // White keys, 28 of them.
+  for (let oct = 0; oct < 4; oct++) {
+    for (let i = 0; i < WHITE_SEMITONES_PER_OCTAVE.length; i++) {
+      const n = WHITE_SEMITONES_PER_OCTAVE[i] + 12 * oct;
+      const k = document.createElement('div');
+      k.className = 'pk-white'
+        + (slot.notes.has(n) ? ' on' : '')
+        + (isRootSemitone(n) ? ' root' : '');
+      k.textContent = String(n);
+      k.dataset.note = String(n);
+      k.addEventListener('click', () => togglePianoNote(n));
+      els.piano.appendChild(k);
+    }
+  }
+
+  // Black keys, 20 of them, absolutely positioned.
+  for (let oct = 0; oct < 4; oct++) {
+    const whiteBase = oct * 7;
+    for (const [boundaryWithinOct, semWithinOct] of BLACK_KEY_OFFSETS) {
+      const boundaryN = whiteBase + boundaryWithinOct;
+      const semitone = 12 * oct + semWithinOct;
+      const leftPct = (boundaryN * 100 / 28) - BLACK_HALF_PCT;
+      const k = document.createElement('div');
+      k.className = 'pk-black' + (slot.notes.has(semitone) ? ' on' : '');
+      k.style.left = leftPct.toFixed(3) + '%';
+      k.textContent = String(semitone);
+      k.dataset.note = String(semitone);
+      k.addEventListener('click', () => togglePianoNote(semitone));
+      els.piano.appendChild(k);
+    }
+  }
+}
+
+// Stub — implemented in Task 18.
+function togglePianoNote(_n) { /* Task 18 */ }
 function renderLedEditor() { /* Task 19 */ }
 function renderValidation(){ /* Task 21 */ }
 function renderToolbar()   { /* Task 24+27 */ }
