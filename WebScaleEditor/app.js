@@ -79,6 +79,14 @@ function slotGradient(s) {
   return `linear-gradient(180deg, ${rgbCss(s.led1)}, ${rgbCss(s.led2)})`;
 }
 
+const UNDO_LIMIT = 100;
+
+function commit(reason) {
+  state.undoStack.push({ snapshot: deepCloneSlots(state.slots), reason });
+  if (state.undoStack.length > UNDO_LIMIT) state.undoStack.shift();
+  state.redoStack.length = 0;
+}
+
 // --- Renderers (filled in by later tasks) ------------------------------
 
 function renderSlotStrip() {
@@ -148,7 +156,20 @@ function renderPiano() {
 }
 
 // Stub — implemented in Task 18.
-function togglePianoNote(_n) { /* Task 18 */ }
+function togglePianoNote(n) {
+  const slot = state.slots[state.currentSlotIndex];
+  commit(`toggle note ${n} in slot ${state.currentSlotIndex}`);
+  // Replace slot with a new object so undo snapshots remain correct.
+  const newSlot = {
+    led1: { ...slot.led1 }, led2: { ...slot.led2 },
+    rootEmphasize: slot.rootEmphasize,
+    notes: new Set(slot.notes),
+  };
+  if (newSlot.notes.has(n)) newSlot.notes.delete(n);
+  else newSlot.notes.add(n);
+  state.slots[state.currentSlotIndex] = newSlot;
+  renderAll();
+}
 function renderLedEditor() { /* Task 19 */ }
 function renderValidation(){ /* Task 21 */ }
 function renderToolbar()   { /* Task 24+27 */ }
