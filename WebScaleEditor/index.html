@@ -72,6 +72,9 @@
     </div>
   </div>
 
-  <script type="module" src="app.js"></script>
+  <!-- Classic scripts (not type="module") so the editor works when this file
+       is opened directly from disk. core.js must load before app.js. -->
+  <script src="core.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

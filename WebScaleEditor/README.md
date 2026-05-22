@@ -28,12 +28,17 @@ If the parent repo has GitHub Pages enabled, the editor is automatically availab
 
 ## For developers
 
-The editor is two ES modules:
+The editor is two plain (non-module) scripts, loaded by `index.html` in order:
 
-- `core.js` — pure logic (parser, serializer, validation, state operations). No DOM.
-- `app.js` — DOM wiring. Imports `core.js`.
+- `core.js` — pure logic (parser, serializer, validation, state operations). No DOM. Exposes its API as `window.HelicalCore` in the browser, and via `module.exports` under Node (for the tests).
+- `app.js` — DOM wiring. Reads the API off `window.HelicalCore`.
 
 Plus `index.html`, `style.css`, and `tests.js`.
+
+> **Why classic scripts and not ES modules?** ES-module `import` is fetched
+> using CORS rules, which the browser refuses over `file://` ("CORS request not
+> http"). Plain `<script src>` tags aren't, so loading `core.js` then `app.js`
+> as classic scripts is what lets you open `index.html` straight from disk.
 
 ### Running the test suite
 

@@ -1,14 +1,15 @@
-import { test } from 'node:test';
-import assert from 'node:assert/strict';
-import { VERSION, parseScaleFile, serializeScaleFile, validateSlot, deepCloneSlots, slotsEqual, createDefaultSlots, applyToSlot, clearSlot, FACTORY_PRESETS } from './core.js';
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+// CommonJS (require, not import) so core.js can be a plain classic script that
+// also runs in the browser from disk. node --test works either way.
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const { VERSION, parseScaleFile, serializeScaleFile, validateSlot, deepCloneSlots, slotsEqual, createDefaultSlots, applyToSlot, clearSlot, FACTORY_PRESETS } = require('./core.js');
+const { readFileSync } = require('node:fs');
+const { join } = require('node:path');
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+// __dirname is provided natively in CommonJS modules.
 const FACTORY = readFileSync(join(__dirname, '../factoryPreset/scale.txt'), 'utf8');
 
-test('core.js loads as an ES module', () => {
+test('core.js loads and exposes VERSION', () => {
   assert.equal(typeof VERSION, 'string');
 });
 

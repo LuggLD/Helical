@@ -1,4 +1,8 @@
-import {
+// core.js is loaded first (as a classic script) and exposes window.HelicalCore.
+// Using a global rather than an ES-module import is what lets index.html be
+// opened directly from disk (file://) without tripping the browser's
+// CORS-for-module-fetches rule.
+const {
   createDefaultSlots,
   deepCloneSlots,
   slotsEqual,
@@ -8,7 +12,7 @@ import {
   serializeScaleFile,
   applyToSlot,
   clearSlot,
-} from './core.js';
+} = window.HelicalCore;
 
 // --- State -------------------------------------------------------------
 
